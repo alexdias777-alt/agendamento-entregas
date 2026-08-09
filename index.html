@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agendamento de Entregas</title>
+
+<style>
+body{
+    font-family:Arial,sans-serif;
+    background:#f2f4f7;
+    margin:0;
+    padding:20px;
+}
+.container{
+    max-width:600px;
+    margin:auto;
+}
+h1{
+    text-align:center;
+    color:#17365d;
+}
+.card{
+    background:white;
+    padding:20px;
+    border-radius:15px;
+    margin-top:20px;
+    box-shadow:0 3px 10px #0002;
+}
+button{
+    width:100%;
+    padding:14px;
+    margin-top:10px;
+    border:0;
+    border-radius:8px;
+    background:#1769aa;
+    color:white;
+    font-size:16px;
+}
+button:hover{
+    background:#0d4f80;
+}
+input,select,textarea{
+    width:100%;
+    padding:12px;
+    margin:7px 0 15px;
+    box-sizing:border-box;
+    border:1px solid #ccc;
+    border-radius:7px;
+}
+.hidden{
+    display:none;
+}
+.aprovado{
+    color:green;
+    font-weight:bold;
+}
+.recusado{
+    color:red;
+    font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>📦 Agendamento de Entregas</h1>
+
+<div class="card" id="inicio">
+    <h2>Escolha o ambiente</h2>
+
+    <button onclick="mostrar('fornecedor')">
+        🚚 Área do Fornecedor
+    </button>
+
+    <button onclick="mostrar('almoxarifado')">
+        🏭 Área do Almoxarifado
+    </button>
+</div>
+
+
+<!-- FORNECEDOR -->
+
+<div class="card hidden" id="fornecedor">
+
+<h2>🚚 Solicitar Agendamento</h2>
+
+<label>Nome do fornecedor</label>
+<input id="fornecedorNome" placeholder="Digite o nome">
+
+<label>Nota Fiscal</label>
+<input id="nf" placeholder="Número da NF">
+
+<label>Pedido de Compra</label>
+<input id="pedido" placeholder="Número do pedido">
+
+<label>Material para recebimento</label>
+<textarea id="material"
+placeholder="Informe o material que será entregue"></textarea>
+
+<label>Data desejada</label>
+<input id="data" type="date">
+
+<label>Horário desejado</label>
+<input id="hora" type="time">
+
+<label>Observações</label>
+<textarea id="obs"
+placeholder="Alguma informação adicional?"></textarea>
+
+<button onclick="enviarSolicitacao()">
+📨 Enviar solicitação
+</button>
+
+<button onclick="voltar()">
+⬅ Voltar
+</button>
+
+<div id="resultado"></div>
+
+</div>
+
+
+<!-- ALMOXARIFADO -->
+
+<div class="card hidden" id="almoxarifado">
+
+<h2>🏭 Análise do Almoxarifado</h2>
+
+<div id="solicitacao">
+<p>Nenhuma solicitação recebida.</p>
+</div>
+
+<button onclick="aprovar()">
+✅ Aprovar entrega
+</button>
+
+<button onclick="recusar()">
+❌ Recusar entrega
+</button>
+
+<button onclick="voltar()">
+⬅ Voltar
+</button>
+
+</div>
+
+</div>
+
+
+<script>
+
+let dados = {};
+
+function mostrar(tela){
+
+document.getElementById("inicio").classList.add("hidden");
+document.getElementById("fornecedor").classList.add("hidden");
+document.getElementById("almoxarifado").classList.add("hidden");
+
+document.getElementById(tela).classList.remove("hidden");
+
+}
+
+function voltar(){
+
+mostrar("inicio");
+
+}
+
+function enviarSolicitacao(){
+
+dados = {
+
+fornecedor: document.getElementById("fornecedorNome").value,
+nf: document.getElementById("nf").value,
+pedido: document.getElementById("pedido").value,
+material: document.getElementById("material").value,
+data: document.getElementById("data").value,
+hora: document.getElementById("hora").value,
+obs: document.getElementById("obs").value
+
+};
+
+if(!dados.fornecedor || !dados.nf || !dados.pedido ||
+!dados.material || !dados.data || !dados.hora){
+
+alert("Preencha todos os campos obrigatórios.");
+
+return;
+
+}
+
+document.getElementById("solicitacao").innerHTML = `
+
+<h3>📋 Solicitação recebida</h3>
+
+<p><b>Fornecedor:</b> ${dados.fornecedor}</p>
+
+<p><b>Nota Fiscal:</b> ${dados.nf}</p>
+
+<p><b>Pedido de Compra:</b> ${dados.pedido}</p>
+
+<p><b>Material:</b> ${dados.material}</p>
+
+<p><b>Data:</b> ${dados.data}</p>
+
+<p><b>Horário:</b> ${dados.hora}</p>
+
+<p><b>Observações:</b> ${dados.obs}</p>
+
+`;
+
+document.getElementById("resultado").innerHTML =
+"<p class='aprovado'>✅ Solicitação enviada para análise!</p>";
+
+}
+
+
+function aprovar(){
+
+document.getElementById("solicitacao").innerHTML += `
+
+<p class="aprovado">
+✅ ENTREGA APROVADA
+</p>
+
+<p>
+Fornecedor autorizado a realizar a entrega no horário solicitado.
+</p>
+
+`;
+
+alert("Entrega aprovada!");
+
+}
+
+
+function recusar(){
+
+let motivo = prompt(
+"Informe o motivo da recusa:"
+);
+
+if(!motivo) return;
+
+document.getElementById("solicitacao").innerHTML += `
+
+<p class="recusado">
+❌ ENTREGA RECUSADA
+</p>
+
+<p>
+<b>Motivo:</b> ${motivo}
+</p>
+
+<button onclick="comunicarFornecedor()">
+📧 Comunicar fornecedor
+</button>
+
+`;
+
+}
+
+
+function comunicarFornecedor(){
+
+let assunto =
+"Recusa de agendamento de entrega - NF " + dados.nf;
+
+let mensagem =
+"Olá, " + dados.fornecedor +
+"%0D%0A%0D%0ASua solicitação de entrega referente à NF " +
+dados.nf +
+" foi recusada.%0D%0A%0D%0A" +
+"Por favor, entre em contato com o almoxarifado para verificar uma nova data.%0D%0A%0D%0A" +
+"Atenciosamente,%0D%0AAlmoxarifado";
+
+window.location.href =
+"mailto:?subject=" +
+encodeURIComponent(assunto) +
+"&body=" +
+mensagem;
+
+}
+
+</script>
+
+</body>
+</html>
